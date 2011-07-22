@@ -5,8 +5,6 @@ from dpaste.models import Snippet
 from dpaste.highlight import LEXER_LIST_ALL, LEXER_LIST, LEXER_DEFAULT
 import datetime
 
-import logging
-
 #===============================================================================
 # Snippet Form and Handling
 #===============================================================================

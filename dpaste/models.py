@@ -14,8 +14,6 @@ from dulwich.repo import Repo
 from dulwich.object_store import tree_lookup_path
 from dulwich.objects import Blob
 
-import logging
-
 t = 'abcdefghijkmnopqrstuvwwxyzABCDEFGHIJKLOMNOPQRSTUVWXYZ1234567890'
 repo = Repo(GITREPO)
 
@@ -32,8 +30,6 @@ class Snippet(models.Model):
         super(Snippet, self).__init__(*args, **kwargs)
 
         if self.branch:
-            logging.warning("Initting %s" % self.branch)
-
             self.title = Snippet.get_title(self.branch)
             self.author = Snippet.get_author(self.branch)
             self.content = Snippet.get_content(self.branch)
