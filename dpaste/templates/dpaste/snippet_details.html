@@ -22,7 +22,6 @@
         {% if snippet.parent_id %}
             {% blocktrans with snippet.parent.get_absolute_url as parent_url and snippet.parent.id as parent_id %}(Copy of <a href="{{ parent_url }}">snippet #{{ parent_id }}</a>){% endblocktrans %}
         {% endif %}
-        <span class="date">{{ snippet.published|date:_("DATETIME_FORMAT") }} ({% trans "UTC" %})</span>
     </h1>
 {% endblock %}
 {% load dpaste_tags %}
@@ -32,7 +31,7 @@
 
 <div class="accordion">
     <div class="snippet-options">
-        <abbr title="{% trans "Time to life" %}">TTL:</abbr> {{ snippet.expires|timeuntil  }}
+        <abbr title="{% trans "Published and merged?" %}">TTL:</abbr> {{ snippet.is_merged|yesno:"yeah,no" }}
         &mdash;
         {% if snippet.pk|in_list:request.session.snippet_list %}
         <a onclick="return confirm('{% trans "Really delete this snippet?" %}')" href="{% url snippet_delete snippet.secret_id %}">Delete now!</a>

@@ -5,65 +5,39 @@ from dpaste.models import Snippet
 from dpaste.highlight import LEXER_LIST_ALL, LEXER_LIST, LEXER_DEFAULT
 import datetime
 
+import logging
+
 #===============================================================================
 # Snippet Form and Handling
 #===============================================================================
 
-EXPIRE_CHOICES = (
-    (3600, _(u'In one hour')),
-    (3600*24*7, _(u'In one week')),
-    (3600*24*30, _(u'In one month')),
-    (3600*24*30*12*100, _(u'Save forever')), # 100 years, I call it forever ;)
-)
-
-EXPIRE_DEFAULT = 3600*24*30
-
 class SnippetForm(forms.ModelForm):
 
-    lexer = forms.ChoiceField(
-        choices=LEXER_LIST,
-        initial=LEXER_DEFAULT,
-        label=_(u'Lexer'),
-    )
+    content = forms.CharField(label='Log',widget=forms.Textarea(attrs={'cols': 80, 'rows': 38}))
     
-    expire_options = forms.ChoiceField(
-        choices=EXPIRE_CHOICES,
-        initial=EXPIRE_DEFAULT,
-        label=_(u'Expires'),
-    )
-
     def __init__(self, request, *args, **kwargs):
         super(SnippetForm, self).__init__(*args, **kwargs)
         self.request = request
         
-        try:
-            if self.request.session['userprefs'].get('display_all_lexer', False):
-                self.fields['lexer'].choices = LEXER_LIST_ALL
-        except KeyError:
-            pass
+        if kwargs.has_key('initial'):
+            initial = kwargs['initial']
+            self.fields['content'].initial = initial['content']
 
-        try:
-            self.fields['author'].initial = self.request.session['userprefs'].get('default_name', '')
-        except KeyError:
-            pass
-        
+        if kwargs.has_key('data'):
+            data = kwargs['data']
+            self.instance.content = data['content']
+            
+
     def save(self, parent=None, *args, **kwargs):
-
         # Set parent snippet
         if parent:
             self.instance.parent = parent
-        
-        # Add expire datestamp
-        self.instance.expires = datetime.datetime.now() + \
-            datetime.timedelta(seconds=int(self.cleaned_data['expire_options']))
-        
+
         # Save snippet in the db
         super(SnippetForm, self).save(*args, **kwargs)
 
         # Add the snippet to the user session list
         if self.request.session.get('snippet_list', False):
-            if len(self.request.session['snippet_list']) >= getattr(settings, 'MAX_SNIPPETS_PER_USER', 10):
-                self.request.session['snippet_list'].pop(0)
             self.request.session['snippet_list'] += [self.instance.pk]
         else:
             self.request.session['snippet_list'] = [self.instance.pk]
@@ -73,10 +47,8 @@ class SnippetForm(forms.ModelForm):
     class Meta:
         model = Snippet
         fields = (
-            'title',
+            'branch',
             'content',
-            'author',
-            'lexer',
         )
 
 

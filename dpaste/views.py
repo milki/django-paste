@@ -20,19 +20,25 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
     tree = snippet.get_root()
     tree = tree.get_descendants(include_self=True)
 
+    logging.warning('new snippet initial');
+
     new_snippet_initial = {
+        'branch': snippet.branch,
         'content': snippet.content,
         'lexer': snippet.lexer,
     }
 
     if request.method == "POST":
+        logging.warning('post form')
         snippet_form = SnippetForm(data=request.POST, request=request, initial=new_snippet_initial)
         if snippet_form.is_valid():
             request, new_snippet = snippet_form.save(parent=snippet)
             return HttpResponseRedirect(new_snippet.get_absolute_url())
     else:
+        logging.warning('new form')
         snippet_form = SnippetForm(initial=new_snippet_initial, request=request)
 
+    logging.warning('template rendering')
     template_context = {
         'snippet_form': snippet_form,
         'snippet': snippet,
