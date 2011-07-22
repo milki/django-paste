@@ -11,26 +11,7 @@ from django.core.urlresolvers import reverse
 from django.utils import simplejson
 import difflib
 
-def snippet_new(request, template_name='dpaste/snippet_new.html'):
-
-    if request.method == "POST":
-        snippet_form = SnippetForm(data=request.POST, request=request)
-        if snippet_form.is_valid():
-            request, new_snippet = snippet_form.save()
-            return HttpResponseRedirect(new_snippet.get_absolute_url())
-    else:
-        snippet_form = SnippetForm(request=request)
-
-    template_context = {
-        'snippet_form': snippet_form,
-    }
-
-    return render_to_response(
-        template_name,
-        template_context,
-        RequestContext(request)
-    )
-
+import logging
 
 def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.html', is_raw=False):
 
@@ -79,18 +60,19 @@ def snippet_delete(request, snippet_id):
         return HttpResponseForbidden('You have no recent snippet list, cookie error?')
     if not snippet.pk in snippet_list:
         return HttpResponseForbidden('That\'s not your snippet, sucka!')
+    if not snippet.is_merged():
+        return HttpResponseForbidden('This snippet is not yet merged to master. Publish first.')
     snippet.delete()
-    return HttpResponseRedirect(reverse('snippet_new'))
+    return HttpResponseRedirect(reverse('snippet_list'))
 
 def snippet_userlist(request, template_name='dpaste/snippet_list.html'):
     
     try:
-        snippet_list = get_list_or_404(Snippet, pk__in=request.session.get('snippet_list', None))
+        snippet_list = Snippet.objects.all()
     except ValueError:
         snippet_list = None
                 
     template_context = {
-        'snippets_max': getattr(settings, 'MAX_SNIPPETS_PER_USER', 10),
         'snippet_list': snippet_list,
     }
 
