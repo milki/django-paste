@@ -26,7 +26,7 @@ class Command(LabelCommand):
         new_snippets = []
         for branch_ref in branches:
             try:
-                new_snippets.append( Snippet.objects.create(branch="%s" % (branch_ref)) )
+                new_snippets.append( Snippet(branch="%s" % (branch_ref)) )
             except UnicodeError:
                 sys.stdout.write(u"Failed to create - %s\n" % (branch_ref))
                 pass
