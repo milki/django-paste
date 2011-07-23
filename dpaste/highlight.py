@@ -22,8 +22,9 @@ LEXER_LIST = (
     ('python3', 'Python 3'),
     ('sql', 'SQL'),
     ('text', 'Text only'),
+    ('irc', 'IRC' ),
 )
-LEXER_DEFAULT = 'python'
+LEXER_DEFAULT = 'irc'
 
 
 class NakedHtmlFormatter(HtmlFormatter):
