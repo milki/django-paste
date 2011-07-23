@@ -68,7 +68,7 @@ def snippet_delete(request, snippet_id):
 def snippet_userlist(request, template_name='dpaste/snippet_list.html'):
     
     try:
-        snippet_list = Snippet.objects.all().reverse()
+        snippet_list = Snippet.objects.raw('SELECT snip.* FROM dpaste_snippet AS snip LEFT OUTER JOIN ( SELECT branch,max(level) as max_level FROM dpaste_snippet GROUP BY branch ) AS msnip ON snip.level = msnip.max_level AND snip.branch = msnip.branch WHERE msnip.max_level IS NOT NULL ORDER BY branch')
     except ValueError:
         snippet_list = None
                 
