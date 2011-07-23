@@ -23,7 +23,13 @@ class Command(LabelCommand):
         allbranches.sort()
         branches = allbranches[1:-1]
 
-        new_snippets = [ Snippet.objects.create(branch="%s" % (branch_ref) ) for branch_ref in branches ]
+        new_snippets = []
+        for branch_ref in branches:
+            try:
+                new_snippets.append( Snippet.objects.create(branch="%s" % (branch_ref)) )
+            except UnicodeError:
+                sys.stdout.write(u"Failed to create - %s\n" % (branch_ref))
+                pass
         sys.stdout.write(u"%s snippets created:\n" % len(new_snippets))
         for c in new_snippets:
             sys.stdout.write(u"%s - %s\n" % (c.branch,c.title))

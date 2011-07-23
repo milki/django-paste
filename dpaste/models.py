@@ -61,7 +61,7 @@ class Snippet(models.Model):
     def get_content(branch):
         bcommit = repo[branch]
         file = tree_lookup_path(repo.get_object,bcommit.tree,Snippet.get_title(branch))
-        return repo.get_object(file[1]).data
+        return repo.get_object(file[1]).data.decode('UTF-8')
 
 
     def is_merged(self):
@@ -85,7 +85,7 @@ class Snippet(models.Model):
         bcommit = repo[self.branch]
         tree = repo.get_object(bcommit.tree)
 
-        blob = Blob.from_string(self.content)
+        blob = Blob.from_string(self.content.encode('UTF-8'))
         tree[filename] = (tree[filename][0],blob.id)
 
         author = "milki <milki@cibo.ircmylife.com>"
