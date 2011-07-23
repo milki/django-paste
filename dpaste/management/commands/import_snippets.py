@@ -36,4 +36,4 @@ class Command(LabelCommand):
         if options.get('dry_run'):
             sys.stdout.write(u'Dry run - Doing nothing! *crossingfingers*\n')
         else:
-            [ snippet.save() for snippet in new_snippets ]
+            [ snippet.save(gitcommit=False) for snippet in new_snippets ]

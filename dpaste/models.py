@@ -77,8 +77,18 @@ class Snippet(models.Model):
 
         if not self.pk:
             self.secret_id = generate_secret_id()
+
+        commit = kwargs.get('commit',False)
+        gitcommit = kwargs.pop('gitcommit',True)
+
         # Database sync
         super(Snippet, self).save(*args, **kwargs)
+
+        if not commit:
+            return
+
+        if not gitcommit:
+            return
 
         # Git sync
         filename = self.get_title(self.branch)
