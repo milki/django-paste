@@ -54,7 +54,8 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
 def snippet_delete(request, snippet_id):
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
     try:
-        snippet_list = request.session['snippet_list']
+        snippet_list = [snippet]
+        #snippet_list = request.session['snippet_list']
     except KeyError:
         return HttpResponseForbidden('You have no recent snippet list, cookie error?')
     if not snippet.pk in snippet_list:
@@ -67,7 +68,7 @@ def snippet_delete(request, snippet_id):
 def snippet_userlist(request, template_name='dpaste/snippet_list.html'):
     
     try:
-        snippet_list = Snippet.objects.all()
+        snippet_list = Snippet.objects.all().reverse()
     except ValueError:
         snippet_list = None
                 

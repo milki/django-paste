@@ -23,7 +23,6 @@
     {% block content %}{% endblock %}
 </div>
 <div id="footer">
-    <a href="{% url snippet_userlist %}">Recent snippets</a>
     <a href="{% url snippet_userprefs %}?next={{ request.build_absolute_url }}">Settings</a>
     {# <a href="{% url about %}">About</a> #}
 </div>

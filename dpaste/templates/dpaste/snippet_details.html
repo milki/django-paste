@@ -15,10 +15,10 @@
      {% endif %}
 {% endblock %}
 
-{% block title %}{% trans "Snippet" %} #{{ snippet.pk }}{% endblock %}
+{% block title %}Log #{{ snippet.pk }}{% endblock %}
 {% block headline %}
     <h1>
-        {% trans "Snippet" %} #{{ snippet.pk }}
+        Log #{{ snippet.pk }}
         {% if snippet.parent_id %}
             {% blocktrans with snippet.parent.get_absolute_url as parent_url and snippet.parent.id as parent_id %}(Copy of <a href="{{ parent_url }}">snippet #{{ parent_id }}</a>){% endblocktrans %}
         {% endif %}
@@ -40,7 +40,7 @@
         <a id="toggleWordwrap" href="#">{% trans "Wordwrap" %}</a>
     </div>
     <h2>
-        {% if snippet.title %}{{ snippet.title }}{% else %} {% trans "Snippet" %} #{{ snippet.id}}{% endif %}
+        {% if snippet.title %}{{ snippet.title }}{% else %} Log #{{ snippet.id}}{% endif %}
         <span>{% if snippet.author %}{% blocktrans with snippet.author as author %}by {{ author }}{% endblocktrans %}{% endif %}</span>
     </h2>
 
@@ -65,7 +65,7 @@
 
 
 {% block sidebar %}
-    <h2>{% trans "History" %}</h2>
+    <h2>Revisions</h2>
 
     <form method="get" id="diffform" action="{% url snippet_diff %}">
     <div class="tree">
@@ -77,9 +77,9 @@
             <input type="radio" name="b" value="{{ tree_item.id }}" {% ifequal snippet tree_item %}checked="checked"{% endifequal %}/>
         </span>
         {% ifequal snippet tree_item %}
-            <strong>{% trans "Snippet" %} #{{ tree_item.id }}</strong>
+            <strong>Log #{{ tree_item.id }}</strong>
        {% else %}
-       <a href="{{ tree_item.get_absolute_url }}">{% trans "Snippet" %} #{{ tree_item.id }}</a>
+       <a href="{{ tree_item.get_absolute_url }}">Log #{{ tree_item.id }}</a>
         {% endifequal %}
         </div>
         {% for level in structure.closed_levels %}</li></ul>{% endfor %}

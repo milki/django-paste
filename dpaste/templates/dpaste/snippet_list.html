@@ -1,20 +1,20 @@
 {% extends "dpaste/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Snippet" %} #{{ snippet.pk }}{% endblock %}
+{% block title %}Log #{{ snippet.pk }}{% endblock %}
 {% block headline %}
-<h1>{% blocktrans %}Snippets{% endblocktrans %}</h1>
+<h1>{% blocktrans %}Logs{% endblocktrans %}</h1>
 {% endblock %}
 
 {% block content %}
-    {% if snippet_list %}
+{% if snippet_list %}
+    <ul>
     {% for snippet in snippet_list %}
-    <h2>
-        <a href="{{ snippet.get_absolute_url }}">{% trans "Snippet" %} #{{ snippet.pk }} - {{ snippet.title }}</a>
-    </h2>
+    <li><a href="{{ snippet.get_absolute_url }}">Log #{{ snippet.pk }} - {{ snippet.title }}</a></li>
     {% endfor %}
+    </ul>
     {% else %}
-    <p>{% trans "No snippets available." %}</p>
+    <p>{% trans "No logs available." %}</p>
     {% endif %}
 
 
