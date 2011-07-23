@@ -23,7 +23,8 @@ class SnippetForm(forms.ModelForm):
 
         if kwargs.has_key('data'):
             data = kwargs['data']
-            self.instance.content = data['content']
+            content = data['content']
+            self.instance.content = data['content'].replace('\r\n', '\n')
             
 
     def save(self, parent=None, *args, **kwargs):

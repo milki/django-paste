@@ -12,7 +12,8 @@ from dpaste.settings import *
 
 from dulwich.repo import Repo
 from dulwich.object_store import tree_lookup_path
-from dulwich.objects import Blob
+from dulwich.objects import Blob, Commit
+from time import time
 
 t = 'abcdefghijkmnopqrstuvwwxyzABCDEFGHIJKLOMNOPQRSTUVWXYZ1234567890'
 repo = Repo(GITREPO)
@@ -73,9 +74,37 @@ class Snippet(models.Model):
         return merged
 
     def save(self, *args, **kwargs):
+
         if not self.pk:
             self.secret_id = generate_secret_id()
+        # Database sync
         super(Snippet, self).save(*args, **kwargs)
+
+        # Git sync
+        filename = self.get_title(self.branch)
+        bcommit = repo[self.branch]
+        tree = repo.get_object(bcommit.tree)
+
+        blob = Blob.from_string(self.content)
+        tree[filename] = (tree[filename][0],blob.id)
+
+        author = "milki <milki@cibo.ircmylife.com>"
+        message = "Editted via dpaste"
+
+        commit = Commit()
+        commit.tree = tree.id
+        commit.parents = [bcommit.id]
+        commit.author = commit.committer = author
+        commit.commit_time = commit.author_time = int(time())
+        commit.commit_timezone = commit.author_timezone = -8 * 3600
+        commit.encoding = 'UTF-8'
+        commit.message = message
+
+        repo.object_store.add_object(blob)
+        repo.object_store.add_object(tree)
+        repo.object_store.add_object(commit)
+
+        repo.refs[self.branch] = commit.id
 
     @permalink
     def get_absolute_url(self):
