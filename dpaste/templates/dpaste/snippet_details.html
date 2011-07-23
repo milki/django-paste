@@ -23,6 +23,7 @@
             {% blocktrans with snippet.parent.get_absolute_url as parent_url and snippet.parent.id as parent_id %}(Copy of <a href="{{ parent_url }}">snippet #{{ parent_id }}</a>){% endblocktrans %}
         {% endif %}
     </h1>
+    <small>{{ snippet.formatted_time }}</small>
 {% endblock %}
 {% load dpaste_tags %}
 
@@ -77,9 +78,9 @@
             <input type="radio" name="b" value="{{ tree_item.id }}" {% ifequal snippet tree_item %}checked="checked"{% endifequal %}/>
         </span>
         {% ifequal snippet tree_item %}
-            <strong>Log {{ tree_item.short_sha1 }}</strong>
+        <strong>Log {{ tree_item.short_sha1 }}</strong><br /><small>({{ tree_item.formatted_time }})</small>
        {% else %}
-       <a href="{{ tree_item.get_absolute_url }}">Log {{ tree_item.short_sha1 }}</a>
+       <a href="{{ tree_item.get_absolute_url }}">Log {{ tree_item.short_sha1 }}</a><br /><small>({{ tree_item.formatted_time }})</small>
         {% endifequal %}
         </div>
         {% for level in structure.closed_levels %}</li></ul>{% endfor %}

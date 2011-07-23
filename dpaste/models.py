@@ -13,7 +13,7 @@ from dpaste.settings import *
 from dulwich.repo import Repo
 from dulwich.object_store import tree_lookup_path
 from dulwich.objects import Blob, Commit
-from time import time
+import time
 
 t = 'abcdefghijkmnopqrstuvwwxyzABCDEFGHIJKLOMNOPQRSTUVWXYZ1234567890'
 repo = Repo(GITREPO)
@@ -33,6 +33,8 @@ class Snippet(models.Model):
 
         if self.branch:
             self.title = Snippet.get_title(self.branch)
+            self.merged = self.is_merged()
+
             if not self.sha1:
                 self.author = Snippet.get_author(self.branch)
                 self.content = Snippet.get_content(self.branch)
@@ -40,8 +42,9 @@ class Snippet(models.Model):
             else:
                 self.author = Snippet.get_author(self.branch,self.sha1)
                 self.content = Snippet.get_content(self.branch,self.sha1)
+
+            self.time = self.get_time(self.sha1)
             self.content_highlighted = pygmentize(self.content, self.lexer)
-            self.merged = self.is_merged()
 
     class Meta:
         ordering = ('-branch',)
@@ -57,6 +60,9 @@ class Snippet(models.Model):
 
     def short_sha1(self):
         return self.sha1[:8]
+
+    def formatted_time(self):
+        return time.strftime("%Y.%m.%d %H:%M:%S", time.localtime(self.time))
 
     @staticmethod
     def get_title(branch):
@@ -81,6 +87,10 @@ class Snippet(models.Model):
     def get_sha1(branch):
         return repo[branch].id
 
+    @staticmethod
+    def get_time(sha1):
+        return repo.get_object(sha1).commit_time
+
     def is_merged(self):
         try:
             bcommit = repo['refs/heads/master']
@@ -95,8 +105,8 @@ class Snippet(models.Model):
         if not self.pk:
             self.secret_id = generate_secret_id()
 
-        commit = kwargs.get('commit',True)
-        gitcommit = kwargs.pop('gitcommit',True)
+        commit = kwargs.get("commit",True)
+        gitcommit = kwargs.pop("gitcommit",True)
 
         if not commit:
             super(Snippet, self).save(*args, **kwargs)
@@ -121,8 +131,8 @@ class Snippet(models.Model):
         commit.tree = tree.id
         commit.parents = [bcommit.id]
         commit.author = commit.committer = author
-        commit.commit_time = commit.author_time = int(time())
-        commit.commit_timezone = commit.author_timezone = -8 * 3600
+        commit.commit_time = commit.author_time = int(time.time())
+        commit.commit_timezone = commit.author_timezone = time.timezone
         commit.encoding = 'UTF-8'
         commit.message = message
 
