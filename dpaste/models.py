@@ -23,17 +23,23 @@ def generate_secret_id(length=4):
 
 class Snippet(models.Model):
     secret_id = models.CharField(_(u'Secret ID'), max_length=4, blank=True)
-    branch = models.CharField(_(u'branch'), max_length=120, blank=True)
+    branch = models.CharField(_(u'branch'), max_length=120, blank=False)
     lexer = models.CharField(_(u'Lexer'), max_length=30, default=LEXER_DEFAULT)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
+    sha1 = models.CharField(_(u'sha1'), max_length=40, null=True, blank=False, unique=True)
 
     def __init__(self, *args, **kwargs):
         super(Snippet, self).__init__(*args, **kwargs)
 
         if self.branch:
             self.title = Snippet.get_title(self.branch)
-            self.author = Snippet.get_author(self.branch)
-            self.content = Snippet.get_content(self.branch)
+            if not self.sha1:
+                self.author = Snippet.get_author(self.branch)
+                self.content = Snippet.get_content(self.branch)
+                self.sha1 = self.get_sha1(self.branch)
+            else:
+                self.author = Snippet.get_author(self.branch,self.sha1)
+                self.content = Snippet.get_content(self.branch,self.sha1)
             self.content_highlighted = pygmentize(self.content, self.lexer)
             self.merged = self.is_merged()
 
@@ -49,20 +55,31 @@ class Snippet(models.Model):
     def raw_content_splitted(self):
         return self.content.splitlines()
 
+    def short_sha1(self):
+        return self.sha1[:8]
+
     @staticmethod
     def get_title(branch):
          return re.sub(r".*/","#",branch)
 
     @staticmethod
-    def get_author(branch):
+    def get_author(branch,sha1=None):
+        if sha1:
+            return repo.get_object(sha1).author
         return repo[branch].author
 
     @staticmethod
-    def get_content(branch):
-        bcommit = repo[branch]
+    def get_content(branch,sha1=None):
+        if sha1:
+            bcommit = repo.get_object(sha1)
+        else:
+            bcommit = repo[branch]
         file = tree_lookup_path(repo.get_object,bcommit.tree,Snippet.get_title(branch))
         return repo.get_object(file[1]).data.decode('UTF-8')
 
+    @staticmethod
+    def get_sha1(branch):
+        return repo[branch].id
 
     def is_merged(self):
         try:
@@ -78,16 +95,15 @@ class Snippet(models.Model):
         if not self.pk:
             self.secret_id = generate_secret_id()
 
-        commit = kwargs.get('commit',False)
+        commit = kwargs.get('commit',True)
         gitcommit = kwargs.pop('gitcommit',True)
 
-        # Database sync
-        super(Snippet, self).save(*args, **kwargs)
-
         if not commit:
+            super(Snippet, self).save(*args, **kwargs)
             return
 
         if not gitcommit:
+            super(Snippet, self).save(*args, **kwargs)
             return
 
         # Git sync
@@ -115,6 +131,10 @@ class Snippet(models.Model):
         repo.object_store.add_object(commit)
 
         repo.refs[self.branch] = commit.id
+
+        # Database sync
+        self.sha1 = commit.id
+        super(Snippet, self).save(*args, **kwargs)
 
     @permalink
     def get_absolute_url(self):

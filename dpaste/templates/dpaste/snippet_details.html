@@ -15,10 +15,10 @@
      {% endif %}
 {% endblock %}
 
-{% block title %}Log #{{ snippet.pk }}{% endblock %}
+{% block title %}Log #{{ snippet.short_sha1 }}{% endblock %}
 {% block headline %}
     <h1>
-        Log #{{ snippet.pk }}
+        Log #{{ snippet.short_sha1 }}
         {% if snippet.parent_id %}
             {% blocktrans with snippet.parent.get_absolute_url as parent_url and snippet.parent.id as parent_id %}(Copy of <a href="{{ parent_url }}">snippet #{{ parent_id }}</a>){% endblocktrans %}
         {% endif %}
@@ -77,9 +77,9 @@
             <input type="radio" name="b" value="{{ tree_item.id }}" {% ifequal snippet tree_item %}checked="checked"{% endifequal %}/>
         </span>
         {% ifequal snippet tree_item %}
-            <strong>Log #{{ tree_item.id }}</strong>
+            <strong>Log {{ tree_item.short_sha1 }}</strong>
        {% else %}
-       <a href="{{ tree_item.get_absolute_url }}">Log #{{ tree_item.id }}</a>
+       <a href="{{ tree_item.get_absolute_url }}">Log {{ tree_item.short_sha1 }}</a>
         {% endifequal %}
         </div>
         {% for level in structure.closed_levels %}</li></ul>{% endfor %}
