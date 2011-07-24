@@ -106,6 +106,7 @@ class Snippet(models.Model):
 
         commit = kwargs.get("commit",True)
         gitcommit = kwargs.pop("gitcommit",True)
+        gitmerge = kwargs.pop("gitmerge",False)
 
         if not commit:
             super(Snippet, self).save(*args, **kwargs)
@@ -116,7 +117,7 @@ class Snippet(models.Model):
             return
 
         # Git sync
-        filename = self.get_title(self.branch)
+        filename = Snippet.get_title(self.branch).encode('UTF-8')
         bcommit = repo[self.branch]
         tree = repo.get_object(bcommit.tree)
 
@@ -144,6 +145,33 @@ class Snippet(models.Model):
         # Database sync
         self.sha1 = commit.id
         super(Snippet, self).save(*args, **kwargs)
+
+    def merge(self):
+        filename = self.title.encode('UTF-8')
+        bcommit = repo[self.branch]
+        btree = repo.get_object(bcommit.tree)
+
+        mcommit = repo['refs/heads/master']
+        mtree = repo.get_object(mcommit.tree)
+
+        author = COMMITTER
+        message = MERGE_MESSAGE % (self.title[1:])
+        
+        mtree[filename] = btree[filename]
+
+        commit = Commit()
+        commit.tree = mtree.id
+        commit.parents = [mcommit.id,bcommit.id]
+        commit.author = commit.committer = author
+        commit.commit_time = commit.author_time = int(time.time())
+        commit.commit_timezone = commit.author_timezone = time.timezone
+        commit.encoding = 'UTF-8'
+        commit.message = message
+        
+        repo.object_store.add_object(mtree)
+        repo.object_store.add_object(commit)
+        
+        repo['refs/heads/master'] = commit.id
 
     @permalink
     def get_absolute_url(self):

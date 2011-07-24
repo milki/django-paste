@@ -6,6 +6,7 @@ urlpatterns = patterns('',
     url(r'^diff/$', 'dpaste.views.snippet_diff', name='snippet_diff'),
     url(r'^your-settings/$', 'dpaste.views.userprefs', name='snippet_userprefs'),
     url(r'^(?P<snippet_id>[a-zA-Z0-9]{4})/$', 'dpaste.views.snippet_details', name='snippet_details'),
+    url(r'^(?P<snippet_id>[a-zA-Z0-9]{4})/merge/$', 'dpaste.views.snippet_merge', name='snippet_merge'),
     url(r'^(?P<snippet_id>[a-zA-Z0-9]{4})/delete/$', 'dpaste.views.snippet_delete', name='snippet_delete'),
     url(r'^(?P<snippet_id>[a-zA-Z0-9]{4})/raw/$', 'dpaste.views.snippet_details', {'template_name': 'dpaste/snippet_details_raw.html', 'is_raw': True}, name='snippet_details_raw'),
 )

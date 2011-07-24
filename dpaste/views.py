@@ -50,6 +50,11 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
     else:
         return response
 
+def snippet_merge(request, snippet_id):
+    snippet = get_object_or_404(Snippet, secret_id=snippet_id)
+    snippet.merge()
+    return HttpResponseRedirect(snippet.get_absolute_url())
+
 def snippet_delete(request, snippet_id):
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
     try:

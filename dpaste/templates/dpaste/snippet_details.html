@@ -32,13 +32,11 @@
 
 <div class="accordion">
     <div class="snippet-options">
-        <abbr title="{% trans "Published and merged?" %}">TTL:</abbr> {{ snippet.is_merged|yesno:"yeah,no" }}
-        &mdash;
-        {% if snippet.pk|in_list:request.session.snippet_list %}
+        {% if snippet.is_merged %}
         <a onclick="return confirm('{% trans "Really delete this snippet?" %}')" href="{% url snippet_delete snippet.secret_id %}">Delete now!</a>
-        &mdash;
+        {% else %}
+        <a onclick="return confirm('{% trans "Really publish this log?" %}')" href="{% url snippet_merge snippet.secret_id %}">Publish now!</a>
         {% endif %}
-        <a id="toggleWordwrap" href="#">{% trans "Wordwrap" %}</a>
     </div>
     <h2>
         {% if snippet.title %}{{ snippet.title }}{% else %} Log #{{ snippet.id}}{% endif %}
