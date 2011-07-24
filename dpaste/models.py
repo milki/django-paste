@@ -6,7 +6,7 @@ import re
 from django.db import models
 from django.db.models import permalink
 from django.utils.translation import ugettext_lazy as _
-from dpaste.highlight import LEXER_DEFAULT, pygmentize
+from dpaste.highlight import pygmentize
 
 from dpaste.settings import *
 
@@ -24,7 +24,6 @@ def generate_secret_id(length=4):
 class Snippet(models.Model):
     secret_id = models.CharField(_(u'Secret ID'), max_length=4, blank=True)
     branch = models.CharField(_(u'branch'), max_length=120, blank=False)
-    lexer = models.CharField(_(u'Lexer'), max_length=30, default=LEXER_DEFAULT)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
     sha1 = models.CharField(_(u'sha1'), max_length=40, null=True, blank=False, unique=True)
 
@@ -44,7 +43,7 @@ class Snippet(models.Model):
                 self.content = Snippet.get_content(self.branch,self.sha1)
 
             self.time = self.get_time(self.sha1)
-            self.content_highlighted = pygmentize(self.content, self.lexer)
+            self.content_highlighted = pygmentize(self.content, 'irc')
 
     class Meta:
         ordering = ('-branch',)

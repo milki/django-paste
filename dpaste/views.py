@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from dpaste.forms import SnippetForm, UserSettingsForm
 from dpaste.models import Snippet
-from dpaste.highlight import pygmentize, guess_code_lexer
+from dpaste.highlight import pygmentize
 from django.core.urlresolvers import reverse
 from django.utils import simplejson
 import difflib
@@ -21,7 +21,6 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
     new_snippet_initial = {
         'branch': snippet.branch,
         'content': snippet.content,
-        'lexer': snippet.lexer,
     }
 
     if request.method == "POST":
@@ -143,8 +142,3 @@ def snippet_diff(request, template_name='dpaste/snippet_diff.html'):
         template_context,
         RequestContext(request)
     )
-    
-def guess_lexer(request):
-    code_string = request.GET.get('codestring', False)
-    response = simplejson.dumps({'lexer': guess_code_lexer(code_string)})
-    return HttpResponse(response)

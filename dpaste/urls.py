@@ -3,7 +3,6 @@ from django.conf import settings
 
 urlpatterns = patterns('',
     url(r'^$', 'dpaste.views.snippet_userlist', name='snippet_userlist'),
-    url(r'^guess/$', 'dpaste.views.guess_lexer', name='snippet_guess_lexer'),
     url(r'^diff/$', 'dpaste.views.snippet_diff', name='snippet_diff'),
     url(r'^your-settings/$', 'dpaste.views.userprefs', name='snippet_userprefs'),
     url(r'^(?P<snippet_id>[a-zA-Z0-9]{4})/$', 'dpaste.views.snippet_details', name='snippet_details'),

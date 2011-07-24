@@ -6,13 +6,8 @@
         {{ field.errors }}
         {{ field.label_tag }}
         {{ field }}
-        {% if request.session.userprefs.display_all_lexer %}
-        {% ifequal field.name "lexer" %}
-            <input type="button" value="{% trans "Guess lexer" %}" id="guess_lexer_btn"/>
-        {% endifequal %}
-        {% endif %}
     </li>
     {% endfor %}
-    <li class="submit"><input type="submit" value="{% trans "Edit it" %}"/></li>
+    <li class="submit"><input type="submit" value="Edit it"/></li>
 </ol>
 </form>

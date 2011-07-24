@@ -2,7 +2,6 @@ from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from dpaste.models import Snippet
-from dpaste.highlight import LEXER_LIST_ALL, LEXER_LIST, LEXER_DEFAULT
 import datetime
 
 #===============================================================================
@@ -69,12 +68,6 @@ USERPREFS_SIZES = [(None, _(u'Default'))] + [(i, '%dpx' % i) for i in range(5, 2
 class UserSettingsForm(forms.Form):
 
     default_name = forms.CharField(label=_(u'Default Name'), required=False)
-    display_all_lexer = forms.BooleanField(
-        label=_(u'Display all lexer'), 
-        required=False,
-        widget=forms.CheckboxInput,
-        help_text=_(u'This also enables the super secret \'guess lexer\' function.'),
-    )
     font_family = forms.ChoiceField(label=_(u'Font Family'), required=False, choices=USERPREFS_FONT_CHOICES)
     font_size = forms.ChoiceField(label=_(u'Font Size'), required=False, choices=USERPREFS_SIZES)
     line_height = forms.ChoiceField(label=_(u'Line Height'), required=False, choices=USERPREFS_SIZES)
