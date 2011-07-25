@@ -57,17 +57,10 @@ def snippet_merge(request, snippet_id):
 
 def snippet_delete(request, snippet_id):
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
-    try:
-        snippet_list = [snippet]
-        #snippet_list = request.session['snippet_list']
-    except KeyError:
-        return HttpResponseForbidden('You have no recent snippet list, cookie error?')
-    if not snippet.pk in snippet_list:
-        return HttpResponseForbidden('That\'s not your snippet, sucka!')
     if not snippet.is_merged():
         return HttpResponseForbidden('This snippet is not yet merged to master. Publish first.')
-    snippet.delete()
-    return HttpResponseRedirect(reverse('snippet_list'))
+    snippet.get_root().get_descendants(include_self=True).delete()
+    return HttpResponseRedirect(reverse('snippet_userlist'))
 
 def snippet_userlist(request, template_name='dpaste/snippet_list.html'):
     

@@ -6,6 +6,9 @@ import re
 from django.db import models
 from django.db.models import permalink
 from django.utils.translation import ugettext_lazy as _
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 from dpaste.highlight import pygmentize
 
 from dpaste.settings import *
@@ -181,3 +184,10 @@ class Snippet(models.Model):
         return '%s' % self.secret_id
 
 mptt.register(Snippet, order_insertion_by=['branch'])
+
+@receiver(post_delete)
+def remove_branch(sender, instance, **kwargs):
+    try:
+        del repo[instance.branch]
+    except:
+        pass
