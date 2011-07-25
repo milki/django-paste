@@ -30,6 +30,20 @@ class Snippet(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
     sha1 = models.CharField(_(u'sha1'), max_length=40, null=True, blank=False, unique=True)
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.secret_id = generate_secret_id()
+
+        commit = kwargs.get("commit",True)
+        gitcommit = kwargs.pop("gitcommit",True)
+
+        if not commit or not gitcommit:
+            super(Snippet, self).save(*args, **kwargs)
+            return
+
+        self.gitsync(*args, **kwargs)
+        super(Snippet, self).save(*args, **kwargs)
+
     class Meta:
         ordering = ('-branch',)
 
@@ -83,6 +97,35 @@ class Snippet(models.Model):
         except KeyError:
             merged = False
         return merged
+
+    def gitsync(self):
+        # Git sync
+        filename = Snippet.get_title(self.branch).encode('UTF-8')
+        bcommit = repo[self.branch]
+        tree = repo.get_object(bcommit.tree)
+
+        blob = Blob.from_string(self.content.encode('UTF-8'))
+        tree[filename] = (tree[filename][0],blob.id)
+
+        author = "milki <milki@cibo.ircmylife.com>"
+        message = "Editted via dpaste"
+
+        commit = Commit()
+        commit.tree = tree.id
+        commit.parents = [bcommit.id]
+        commit.author = commit.committer = author
+        commit.commit_time = commit.author_time = int(time.time())
+        commit.commit_timezone = commit.author_timezone = time.timezone
+        commit.encoding = 'UTF-8'
+        commit.message = message
+
+        repo.object_store.add_object(blob)
+        repo.object_store.add_object(tree)
+        repo.object_store.add_object(commit)
+
+        repo.refs[self.branch] = commit.id
+
+        self.sha1 = commit.id
 
     def merge(self):
         filename = self.title.encode('UTF-8')
@@ -144,42 +187,3 @@ def init_meta(sender,instance,**kwargs):
         instance.time = instance.get_time(instance.sha1)
         instance.content_highlighted = pygmentize(instance.content, 'irc')
 
-@receiver(pre_save,sender=Snippet)
-def gitsync(sender,instance,raw,using,**kwargs):
-    commit = kwargs.get("commit",True)
-    gitcommit = kwargs.pop("gitcommit",True)
-
-    if not commit or not gitcommit:
-        return
-
-    # Git sync
-    filename = Snippet.get_title(instance.branch).encode('UTF-8')
-    bcommit = repo[instance.branch]
-    tree = repo.get_object(bcommit.tree)
-
-    blob = Blob.from_string(instance.content.encode('UTF-8'))
-    tree[filename] = (tree[filename][0],blob.id)
-
-    author = "milki <milki@cibo.ircmylife.com>"
-    message = "Editted via dpaste"
-
-    commit = Commit()
-    commit.tree = tree.id
-    commit.parents = [bcommit.id]
-    commit.author = commit.committer = author
-    commit.commit_time = commit.author_time = int(time.time())
-    commit.commit_timezone = commit.author_timezone = time.timezone
-    commit.encoding = 'UTF-8'
-    commit.message = message
-
-    repo.object_store.add_object(blob)
-    repo.object_store.add_object(tree)
-    repo.object_store.add_object(commit)
-
-    repo.refs[instance.branch] = commit.id
-
-    # Db sync
-    if not instance.pk:
-        instance.secret_id = generate_secret_id()
-
-    instance.sha1 = commit.id
