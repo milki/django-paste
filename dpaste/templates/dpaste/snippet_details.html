@@ -35,7 +35,7 @@
         {% if snippet.is_merged %}
         <a onclick="return confirm('{% trans "Really delete this snippet?" %}')" href="{% url snippet_delete snippet.secret_id %}">Delete now!</a>
         {% else %}
-        <a onclick="return confirm('{% trans "Really publish this log?" %}')" href="{% url snippet_merge snippet.secret_id %}">Publish now!</a>
+        <a onclick="return confirm('{% trans "Really publish this log?" %}')" href="{% url snippet_gitmerge snippet.secret_id %}">Publish now!</a>
         {% endif %}
     </div>
     <h2>
@@ -54,10 +54,12 @@
         </div>
     </div>
 
-    <h2>{% trans "Write an answer" %} &rarr;</h2>
+    {% if not snippet.is_merged %}
+    <h2>{% trans "Edit log" %} &rarr;</h2>
     <div class="container" style="display: none;">
         {% include "dpaste/snippet_form.html" %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 

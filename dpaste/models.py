@@ -34,14 +34,6 @@ class Snippet(models.Model):
         if not self.pk:
             self.secret_id = generate_secret_id()
 
-        commit = kwargs.get("commit",True)
-        gitcommit = kwargs.pop("gitcommit",True)
-
-        if not commit or not gitcommit:
-            super(Snippet, self).save(*args, **kwargs)
-            return
-
-        self.gitsync(*args, **kwargs)
         super(Snippet, self).save(*args, **kwargs)
 
     class Meta:
@@ -98,10 +90,10 @@ class Snippet(models.Model):
             merged = False
         return merged
 
-    def gitsync(self):
-        # Git sync
+    def gitcommit(self, parent=None):
+        # Git commit
         filename = Snippet.get_title(self.branch).encode('UTF-8')
-        bcommit = repo[self.branch]
+        bcommit = repo.get_object(parent.sha1)
         tree = repo.get_object(bcommit.tree)
 
         blob = Blob.from_string(self.content.encode('UTF-8'))
@@ -123,13 +115,13 @@ class Snippet(models.Model):
         repo.object_store.add_object(tree)
         repo.object_store.add_object(commit)
 
-        repo.refs[self.branch] = commit.id
+        repo[self.branch] = commit.id
 
         self.sha1 = commit.id
 
-    def merge(self):
+    def gitmerge(self, parent=None):
         filename = self.title.encode('UTF-8')
-        bcommit = repo[self.branch]
+        bcommit = repo.get_object(parent.sha1)
         btree = repo.get_object(bcommit.tree)
 
         mcommit = repo['refs/heads/master']
@@ -138,7 +130,7 @@ class Snippet(models.Model):
         author = COMMITTER
         message = MERGE_MESSAGE % (self.title[1:])
         
-        mtree[filename] = btree[filename]
+        mtree[filename] = btree[filename] # add new file to master tree
 
         commit = Commit()
         commit.tree = mtree.id
@@ -151,8 +143,10 @@ class Snippet(models.Model):
         
         repo.object_store.add_object(mtree)
         repo.object_store.add_object(commit)
-        
+
         repo['refs/heads/master'] = commit.id
+
+        self.sha1 = commit.id
 
     @permalink
     def get_absolute_url(self):

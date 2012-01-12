@@ -28,6 +28,8 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
         if snippet_form.is_valid():
             request, new_snippet = snippet_form.save(parent=snippet)
             return HttpResponseRedirect(new_snippet.get_absolute_url())
+        else:
+            return HttpResponseBadRequest("Invalid form data");
     else:
         snippet_form = SnippetForm(initial=new_snippet_initial, request=request)
 
@@ -50,9 +52,9 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
     else:
         return response
 
-def snippet_merge(request, snippet_id):
+def snippet_gitmerge(request, snippet_id):
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
-    snippet.merge()
+    snippet.gitmerge(parent=snippet)
     return HttpResponseRedirect(snippet.get_absolute_url())
 
 def snippet_delete(request, snippet_id):
