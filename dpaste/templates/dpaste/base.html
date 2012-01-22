@@ -6,6 +6,13 @@
 <head>
     <title>dpaste: {% block title %}snippets{% endblock %}</title>
     <link rel="stylesheet" media="screen, projection" href="{{ STATIC_URL }}theme.css"/>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    <script src="/js/codemirror.js"></script>
+    <script src="/js/search.js"></script>
+    <script src="/js/searchcursor.js"></script>
+    <script src="/js/dialog.js"></script>
+    <link rel="stylesheet" href="/css/codemirror.css">
+    <link rel="stylesheet" href="/css/dialog.css">
     {% block extrahead %}{% endblock %}
 </head>
 <body>
