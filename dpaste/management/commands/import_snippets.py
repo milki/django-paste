@@ -21,9 +21,15 @@ class Command(LabelCommand):
 
     def handle(self, *args, **options):
         repo = Repo(GITREPO)
+        sys.stdout.write(u"Reading snippets from %s...\n" % (repo.path))
+
         allbranches = list(repo.refs.keys())
         allbranches.sort()
-        branches = [ branch for branch in allbranches if not re.search('remotes|master|HEAD',branch) ]
+
+        if repo.has_index():
+            branches = [ branch for branch in allbranches if not re.search('master|HEAD',branch) ]
+        else:
+            branches = [ branch for branch in allbranches if not re.search('remotes|master|HEAD',branch) ]
 
         new_snippets = []
         for branch_ref in branches:
@@ -37,7 +43,7 @@ class Command(LabelCommand):
         for c in new_snippets:
             sys.stdout.write(u"%s - %s\n" % (c.branch,c.title))
         if options.get('commit'):
-            [ snippet.save(gitcommit=False) for snippet in new_snippets ]
+            [ snippet.save() for snippet in new_snippets ]
             sys.stdout.write(u"%s snippets created\n" % len(new_snippets))
         else:
             sys.stdout.write(u'Dry run - Doing nothing! *crossingfingers*\n')
