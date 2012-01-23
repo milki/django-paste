@@ -31,14 +31,14 @@ class SnippetForm(forms.ModelForm):
         if parent:
             self.instance.parent = parent
 
-        # Save snippet in the db
-        super(SnippetForm, self).save(*args, **kwargs)
-
         commit = kwargs.get("commit",True)
         gitcommit = kwargs.pop("gitcommit",True)
 
         if commit and gitcommit:
             self.instance.gitcommit(parent=parent)
+
+        # Save snippet in the db
+        super(SnippetForm, self).save(*args, **kwargs)
 
         # Add the snippet to the user session list
         if self.request.session.get('snippet_list', False):
