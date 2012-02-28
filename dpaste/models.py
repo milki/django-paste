@@ -129,7 +129,7 @@ class Snippet(models.Model):
 
         author = COMMITTER
         message = MERGE_MESSAGE % (self.title[1:])
-        
+
         mtree[filename] = btree[filename] # add new file to master tree
 
         commit = Commit()
@@ -140,7 +140,7 @@ class Snippet(models.Model):
         commit.commit_timezone = commit.author_timezone = time.timezone
         commit.encoding = 'UTF-8'
         commit.message = message
-        
+
         repo.object_store.add_object(mtree)
         repo.object_store.add_object(commit)
 
