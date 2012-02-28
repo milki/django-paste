@@ -1,3 +1,18 @@
+milki fork files branch
+===
+
+- Change snippet backend from db to db+git
+using dulwich
+    - snippets based on commit sha1
+    - each snippet is a seperate branch
+    denoted by branch name 'chan.date.log'
+- snippets represent irc logfilesm
+'#chan.date.log'
+- Snippet edit makes a new commit
+- Snippet merge merges snippet into master branch
+- Snippet delete delets coresponding branch
+- import_snippets command adds new snippet branches
+
 v0.2
 ====
 
