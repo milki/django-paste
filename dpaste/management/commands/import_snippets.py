@@ -3,6 +3,7 @@ import sys
 from optparse import make_option
 from django.core.management.base import CommandError, LabelCommand
 from dpaste.models import Snippet
+from dpaste.settings import *
 
 from dulwich.repo import Repo
 from dulwich.object_store import tree_lookup_path
@@ -18,7 +19,7 @@ class Command(LabelCommand):
     def extract_log(x): return re.sub(r".*/","#",x)
 
     def handle(self, *args, **options):
-        repo = Repo('/home/milki/git/ircmylife-logs.git')
+        repo = Repo(GITREPO)
         allbranches = list(repo.refs.keys())
         allbranches.sort()
         branches = allbranches[1:-1]
@@ -26,14 +27,16 @@ class Command(LabelCommand):
         new_snippets = []
         for branch_ref in branches:
             try:
-                new_snippets.append( Snippet(branch="%s" % (branch_ref)) )
+                if not Snippet.objects.filter(branch="%s" % (branch_ref)):
+                    new_snippets.append( Snippet(branch="%s" % (branch_ref)) )
             except UnicodeError:
                 sys.stdout.write(u"Failed to create - %s\n" % (branch_ref))
                 pass
-        sys.stdout.write(u"%s snippets created:\n" % len(new_snippets))
+        sys.stdout.write(u"%s snippets found\n" % len(new_snippets))
         for c in new_snippets:
             sys.stdout.write(u"%s - %s\n" % (c.branch,c.title))
         if options.get('dry_run'):
             sys.stdout.write(u'Dry run - Doing nothing! *crossingfingers*\n')
         else:
             [ snippet.save(gitcommit=False) for snippet in new_snippets ]
+            sys.stdout.write(u"%s snippets created\n" % len(new_snippets))
