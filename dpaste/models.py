@@ -107,8 +107,8 @@ class Snippet(models.Model):
         blob = Blob.from_string(self.content.encode('UTF-8'))
         tree[filename] = (tree[filename][0],blob.id)
 
-        author = "milki <milki@cibo.ircmylife.com>"
-        message = "Editted via dpaste"
+        author = COMMITTER
+        message = EDIT_MESSAGE
 
         commit = Commit()
         commit.tree = tree.id
