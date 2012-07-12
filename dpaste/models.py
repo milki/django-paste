@@ -11,7 +11,7 @@ from django.dispatch import receiver
 
 from dpaste.highlight import pygmentize
 
-from dpaste.settings import *
+from django.conf import settings
 
 from dulwich.repo import Repo
 from dulwich.object_store import tree_lookup_path
@@ -19,7 +19,7 @@ from dulwich.objects import Blob, Commit
 import time
 
 t = 'abcdefghijkmnopqrstuvwwxyzABCDEFGHIJKLOMNOPQRSTUVWXYZ1234567890'
-repo = Repo(GITREPO)
+repo = Repo(getattr(settings, 'DPASTE_GITREPO', None))
 
 def generate_secret_id(length=4):
     return ''.join([random.choice(t) for i in range(length)])
@@ -99,8 +99,8 @@ class Snippet(models.Model):
         blob = Blob.from_string(self.content.encode('UTF-8'))
         tree[filename] = (tree[filename][0],blob.id)
 
-        author = COMMITTER
-        message = EDIT_MESSAGE
+        author = getattr(settings, 'DPASTE_COMMITTER', 'django-paste')
+        message = getattr(settings, 'DPASTE_EDIT_MESSAGE', 'editted')
 
         commit = Commit()
         commit.tree = tree.id
@@ -127,8 +127,8 @@ class Snippet(models.Model):
         mcommit = repo['refs/heads/master']
         mtree = repo.get_object(mcommit.tree)
 
-        author = COMMITTER
-        message = MERGE_MESSAGE % (self.title[1:])
+        author = getattr(settings, 'DPASTE_COMMITTER', 'django-paste')
+        message = getattr(settings, 'DPASTE_MERGE_MESSAGE', "%s") % (self.title[1:])
 
         mtree[filename] = btree[filename] # add new file to master tree
 

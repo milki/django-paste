@@ -4,7 +4,7 @@ import re
 from optparse import make_option
 from django.core.management.base import CommandError, LabelCommand
 from dpaste.models import Snippet
-from dpaste.settings import *
+from django.conf import settings
 
 from dulwich.repo import Repo
 from dulwich.object_store import tree_lookup_path
@@ -20,7 +20,7 @@ class Command(LabelCommand):
     def extract_log(x): return re.sub(r".*/","#",x)
 
     def handle(self, *args, **options):
-        repo = Repo(GITREPO)
+        repo = Repo(getattr(settings, 'DPASTE_GITREPO', None))
         sys.stdout.write(u"Reading snippets from %s...\n" % (repo.path))
 
         allbranches = list(repo.refs.keys())
@@ -46,4 +46,4 @@ class Command(LabelCommand):
             [ snippet.save() for snippet in new_snippets ]
             sys.stdout.write(u"%s snippets created\n" % len(new_snippets))
         else:
-            sys.stdout.write(u'Dry run - Doing nothing! *crossingfingers*\n')
+            sys.stdout.write(u'Dry run - Doing nothing! *crossingfingers* (-c to commit changes)\n')
