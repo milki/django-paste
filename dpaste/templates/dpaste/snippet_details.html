@@ -32,11 +32,7 @@
 
 <div class="accordion">
     <div class="snippet-options">
-        {% if snippet.is_merged %}
-        <a onclick="return confirm('{% trans "Really delete this snippet?" %}')" href="{% url snippet_delete snippet.secret_id %}">Delete now!</a>
-        {% else %}
-        <a onclick="return confirm('{% trans "Really publish this log?" %}')" href="{% url snippet_gitmerge snippet.secret_id %}">Publish now!</a>
-        {% endif %}
+        <a href="{% url snippet_gitmerge snippet.secret_id %}">Publish and Delete</a>
     </div>
     <h2>
         {% if snippet.title %}{{ snippet.title }}{% else %} Log {{ snippet.id}}{% endif %}

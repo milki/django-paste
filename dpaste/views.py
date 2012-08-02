@@ -55,7 +55,8 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
 def snippet_gitmerge(request, snippet_id):
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
     snippet.gitmerge(parent=snippet)
-    return HttpResponseRedirect(snippet.get_absolute_url())
+    snippet.get_root().get_descendants(include_self=True).delete()
+    return HttpResponseRedirect(reverse('snippet_userlist'))
 
 def snippet_delete(request, snippet_id):
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
