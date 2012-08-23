@@ -27,9 +27,9 @@ class Command(LabelCommand):
         allbranches.sort()
 
         if repo.has_index():
-            branches = [ branch for branch in allbranches if not re.search('master|HEAD',branch) ]
+            branches = [ branch for branch in allbranches if not re.search('master|HEAD|scripts',branch) ]
         else:
-            branches = [ branch for branch in allbranches if not re.search('remotes|master|HEAD',branch) ]
+            branches = [ branch for branch in allbranches if not re.search('remotes|master|HEAD|scripts',branch) ]
 
         new_snippets = []
         for branch_ref in branches:
