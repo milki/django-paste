@@ -109,8 +109,8 @@ class UserSettingsForm(forms.Form):
         label=_(u'Display all lexer'),
         required=False,
         widget=forms.CheckboxInput,
-        help_text=_(u'This also enables the super secret \'guess lexer\'
-                    function.'),
+        help_text=
+        _(u'This also enables the super secret \'guess lexer\' function.'),
     )
     font_family = forms.ChoiceField(label=_(u'Font Family'),
                                     required=False,

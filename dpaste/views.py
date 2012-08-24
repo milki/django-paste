@@ -90,8 +90,8 @@ def snippet_delete(request, snippet_id):
     try:
         snippet_list = request.session['snippet_list']
     except KeyError:
-        return HttpResponseForbidden('You have no recent snippet list,
-                                     cookie error?')
+        return HttpResponseForbidden(
+            'You have no recent snippet list, cookie error?')
     if not snippet.pk in snippet_list:
         return HttpResponseForbidden('That\'s not your snippet, sucka!')
     snippet.delete()
