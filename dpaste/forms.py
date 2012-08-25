@@ -33,9 +33,24 @@ class SnippetForm(forms.ModelForm):
         label=_(u'Expires'),
     )
 
+    if not hasattr(Snippet, 'content'):
+        content = forms.CharField(
+            label='Content',
+            widget=forms.Textarea(attrs={'cols': 80, 'rows': 38}))
+
     def __init__(self, request, *args, **kwargs):
         super(SnippetForm, self).__init__(*args, **kwargs)
         self.request = request
+
+        if not hasattr(Snippet, 'content'):
+            if 'initial' in kwargs:
+                initial = kwargs['initial']
+                self.fields['content'].initial = initial['content']
+
+            if 'data' in kwargs:
+                data = kwargs['data']
+                content = data['content']
+                self.instance.content = data['content'].replace('\r\n', '\n')
 
         try:
             if self.request.session['userprefs'].get(

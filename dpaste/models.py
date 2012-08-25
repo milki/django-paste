@@ -5,12 +5,16 @@ from django.conf import settings
 from django.db import models
 from django.db.models import permalink
 from django.utils.translation import ugettext_lazy as _
-from dpaste.highlight import LEXER_DEFAULT
+from django.db.models.signals import post_init, pre_save, post_delete
+from django.dispatch import receiver
+from dpaste.highlight import LEXER_DEFAULT, pygmentize
 
 content_model = getattr(settings, 'DPASTE_SNIPPET_CONTENT_MODEL', 'database')
 
 if content_model is 'database':
     from dpaste.content_models.database import DBSnippet as ContentModel
+elif content_model is 'git':
+    from dpaste.content_models.git import GitSnippet as ContentModel
 else:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Invalid DPASTE_SNIPPET_CONTENT_MODEL. \
@@ -48,3 +52,15 @@ class Snippet(ContentModel):
 
     def __unicode__(self):
         return '%s' % self.secret_id
+
+    def __init__(self, *args, **kwargs):
+        super(Snippet, self).__init__(*args, **kwargs)
+        if not hasattr(self, 'content_highlighted'):
+            self.content_highlighted = pygmentize(self.content,
+                                                  self.lexer)
+
+
+@receiver(post_delete, sender=Snippet)
+def remove_content(sender, instance, **kwargs):
+    if hasattr(instance, 'remove_content'):
+        instance.remove_content()
