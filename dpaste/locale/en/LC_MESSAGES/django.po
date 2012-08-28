@@ -30,7 +30,7 @@ msgstr "Syntax"
 
 #: views.py:138
 msgid "No changes were made between this two files."
-msgstr ""
+msgstr "No diff between these two logs."
 
 #: content_models/database.py:12 content_models/git.py:22
 #: content_models/git.py:103
@@ -62,7 +62,7 @@ msgstr ""
 #: templates/dpaste/snippet_details.html:39
 #: templates/dpaste/snippet_list.html:4 templates/dpaste/snippet_list.html:14
 msgid "Snippet"
-msgstr ""
+msgstr "Log"
 
 #: templates/dpaste/snippet_details.html:22
 #: templates/dpaste/snippet_details.html:76
@@ -76,11 +76,11 @@ msgstr ""
 
 #: templates/dpaste/snippet_details.html:32
 msgid "Time to life"
-msgstr ""
+msgstr "Time to live"
 
 #: templates/dpaste/snippet_details.html:34
 msgid "Really publish this snippet"
-msgstr ""
+msgstr "Really publish this log"
 
 #: templates/dpaste/snippet_details.html:36
 msgid "Wordwrap"
@@ -93,7 +93,7 @@ msgstr ""
 
 #: templates/dpaste/snippet_details.html:54
 msgid "Write an answer"
-msgstr ""
+msgstr "Edit log"
 
 #: templates/dpaste/snippet_details.html:64
 msgid "History"
@@ -128,15 +128,15 @@ msgstr ""
 
 #: templates/dpaste/snippet_form.html:11
 msgid "Paste it"
-msgstr ""
+msgstr "Update log"
 
 #: templates/dpaste/snippet_list.html:6
 msgid "Your snippets"
-msgstr ""
+msgstr "Your IRC logs"
 
 #: templates/dpaste/snippet_list.html:19
 msgid "No snippets available."
-msgstr ""
+msgstr "No logs available."
 
 #: templates/dpaste/snippet_list.html:24
 msgid "DATA_STORED_IN_A_COOKIE_HINT"
