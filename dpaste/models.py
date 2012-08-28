@@ -15,6 +15,8 @@ if content_model is 'database':
     from dpaste.content_models.database import DBSnippet as ContentModel
 elif content_model is 'git':
     from dpaste.content_models.git import GitSnippet as ContentModel
+elif content_model is 'ircloggit':
+    from dpaste.content_models.git import IRCLogGitSnippet as ContentModel
 else:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Invalid DPASTE_SNIPPET_CONTENT_MODEL. \
@@ -55,7 +57,8 @@ class Snippet(ContentModel):
 
     def __init__(self, *args, **kwargs):
         super(Snippet, self).__init__(*args, **kwargs)
-        if not hasattr(self, 'content_highlighted'):
+        if hasattr(self, 'content') and \
+                not hasattr(self, 'content_highlighted'):
             self.content_highlighted = pygmentize(self.content,
                                                   self.lexer)
 
