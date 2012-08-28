@@ -1,6 +1,15 @@
-from django.shortcuts import render_to_response, get_object_or_404, get_list_or_404
+from django.shortcuts import (
+    render_to_response,
+    get_object_or_404,
+    get_list_or_404,
+)
 from django.template.context import RequestContext
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponse, HttpResponseForbidden
+from django.http import (
+    HttpResponseRedirect,
+    HttpResponseBadRequest,
+    HttpResponse,
+    HttpResponseForbidden,
+)
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
@@ -10,6 +19,7 @@ from dpaste.highlight import pygmentize, guess_code_lexer
 from django.core.urlresolvers import reverse
 from django.utils import simplejson
 import difflib
+
 
 def snippet_new(request, template_name='dpaste/snippet_new.html'):
 
@@ -32,7 +42,8 @@ def snippet_new(request, template_name='dpaste/snippet_new.html'):
     )
 
 
-def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.html', is_raw=False):
+def snippet_details(request, snippet_id,
+                    template_name='dpaste/snippet_details.html', is_raw=False):
 
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
 
@@ -45,12 +56,14 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
     }
 
     if request.method == "POST":
-        snippet_form = SnippetForm(data=request.POST, request=request, initial=new_snippet_initial)
+        snippet_form = SnippetForm(data=request.POST, request=request,
+                                   initial=new_snippet_initial)
         if snippet_form.is_valid():
             request, new_snippet = snippet_form.save(parent=snippet)
             return HttpResponseRedirect(new_snippet.get_absolute_url())
     else:
-        snippet_form = SnippetForm(initial=new_snippet_initial, request=request)
+        snippet_form = SnippetForm(initial=new_snippet_initial,
+                                   request=request)
 
     template_context = {
         'snippet_form': snippet_form,
@@ -71,24 +84,28 @@ def snippet_details(request, snippet_id, template_name='dpaste/snippet_details.h
     else:
         return response
 
+
 def snippet_delete(request, snippet_id):
     snippet = get_object_or_404(Snippet, secret_id=snippet_id)
     try:
         snippet_list = request.session['snippet_list']
     except KeyError:
-        return HttpResponseForbidden('You have no recent snippet list, cookie error?')
+        return HttpResponseForbidden('You have no recent snippet list,
+                                     cookie error?')
     if not snippet.pk in snippet_list:
         return HttpResponseForbidden('That\'s not your snippet, sucka!')
     snippet.delete()
     return HttpResponseRedirect(reverse('snippet_new'))
 
+
 def snippet_userlist(request, template_name='dpaste/snippet_list.html'):
-    
+
     try:
-        snippet_list = get_list_or_404(Snippet, pk__in=request.session.get('snippet_list', None))
+        snippet_list = get_list_or_404(
+            Snippet, pk__in=request.session.get('snippet_list', None))
     except ValueError:
         snippet_list = None
-                
+
     template_context = {
         'snippets_max': getattr(settings, 'MAX_SNIPPETS_PER_USER', 10),
         'snippet_list': snippet_list,
@@ -104,12 +121,15 @@ def snippet_userlist(request, template_name='dpaste/snippet_list.html'):
 def userprefs(request, template_name='dpaste/userprefs.html'):
 
     if request.method == 'POST':
-        settings_form = UserSettingsForm(request.POST, initial=request.session.get('userprefs', None))
+        settings_form = UserSettingsForm(
+            request.POST,
+            initial=request.session.get('userprefs', None))
         if settings_form.is_valid():
             request.session['userprefs'] = settings_form.cleaned_data
             settings_saved = True
     else:
-        settings_form = UserSettingsForm(initial=request.session.get('userprefs', None))
+        settings_form = UserSettingsForm(
+            initial=request.session.get('userprefs', None))
         settings_saved = False
 
     template_context = {
@@ -123,11 +143,12 @@ def userprefs(request, template_name='dpaste/userprefs.html'):
         RequestContext(request)
     )
 
+
 def snippet_diff(request, template_name='dpaste/snippet_diff.html'):
 
     a = request.GET.get("a")
     b = request.GET.get("b")
-    
+
     if a is not None and a.isdigit() and b is not None and b.isdigit():
         try:
             fileA = Snippet.objects.get(pk=int(a))
@@ -161,7 +182,8 @@ def snippet_diff(request, template_name='dpaste/snippet_diff.html'):
         template_context,
         RequestContext(request)
     )
-    
+
+
 def guess_lexer(request):
     code_string = request.GET.get('codestring', False)
     response = simplejson.dumps({'lexer': guess_code_lexer(code_string)})

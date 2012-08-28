@@ -29,12 +29,17 @@ LEXER_DEFAULT = 'python'
 class NakedHtmlFormatter(HtmlFormatter):
     def wrap(self, source, outfile):
         return self._wrap_code(source)
+
     def _wrap_code(self, source):
         for i, t in source:
             yield i, t
 
+
 def pygmentize(code_string, lexer_name='text'):
-    return highlight(code_string, get_lexer_by_name(lexer_name), NakedHtmlFormatter())
+    return highlight(code_string,
+                     get_lexer_by_name(lexer_name),
+                     NakedHtmlFormatter())
+
 
 def guess_code_lexer(code_string, default_lexer='unknown'):
     try:
