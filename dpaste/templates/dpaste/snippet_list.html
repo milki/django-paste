@@ -3,18 +3,18 @@
 
 {% block title %}{% trans "Snippet" %} #{{ snippet.pk }}{% endblock %}
 {% block headline %}
-<h1>{% blocktrans %}Your latest {{ snippets_max }} snippets{% endblocktrans %}</h1>
+<h1>{% blocktrans %}Your snippets{% endblocktrans %}</h1>
 {% endblock %}
 
 {% block content %}
     {% if snippet_list %}
+    <ul>
     {% for snippet in snippet_list %}
-    <h2>
-        <a href="{{ snippet.get_absolute_url }}">{% trans "Snippet" %} #{{ snippet.pk }}</a>
-        ~ {{ snippet.published|date:_("DATETIME_FORMAT") }}
-    </h2>
-    <p style="color: #555; margin: 8px 0 20px 0;">{{ snippet.content|truncatewords:40 }}</p>
+    <li>
+        <a href="{{ snippet.get_absolute_url }}">{% trans "Snippet" %} {{ snippet.title }}</a>
+    </li>
     {% endfor %}
+</ul>
     {% else %}
     <p>{% trans "No snippets available." %}</p>
     {% endif %}

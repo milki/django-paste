@@ -13,33 +13,12 @@ from django.http import (
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
-from dpaste.forms import SnippetForm, UserSettingsForm
+from dpaste.forms import SnippetForm
 from dpaste.models import Snippet
 from dpaste.highlight import pygmentize, guess_code_lexer
 from django.core.urlresolvers import reverse
 from django.utils import simplejson
 import difflib
-
-
-def snippet_new(request, template_name='dpaste/snippet_new.html'):
-
-    if request.method == "POST":
-        snippet_form = SnippetForm(data=request.POST, request=request)
-        if snippet_form.is_valid():
-            request, new_snippet = snippet_form.save()
-            return HttpResponseRedirect(new_snippet.get_absolute_url())
-    else:
-        snippet_form = SnippetForm(request=request)
-
-    template_context = {
-        'snippet_form': snippet_form,
-    }
-
-    return render_to_response(
-        template_name,
-        template_context,
-        RequestContext(request)
-    )
 
 
 def snippet_details(request, snippet_id,
@@ -51,6 +30,8 @@ def snippet_details(request, snippet_id,
     tree = tree.get_descendants(include_self=True)
 
     new_snippet_initial = {
+        'title' : snippet.title,
+        'sha1' : snippet.sha1,
         'content': snippet.content,
         'lexer': snippet.lexer,
     }
@@ -98,43 +79,28 @@ def snippet_delete(request, snippet_id):
     return HttpResponseRedirect(reverse('snippet_new'))
 
 
+def snippet_merge(request, snippet_id):
+    snippet = get_object_or_404(Snippet, secret_id=snippet_id)
+    snippet.gitmerge()
+    snippet.get_root().get_descendants(include_self=True).delete()
+    return HttpResponseRedirect(reverse('snippet_userlist'))
+
+
 def snippet_userlist(request, template_name='dpaste/snippet_list.html'):
 
     try:
-        snippet_list = get_list_or_404(
-            Snippet, pk__in=request.session.get('snippet_list', None))
+        snippet_list = Snippet.objects.raw(
+        'SELECT snip.* FROM dpaste_snippet AS snip \
+            LEFT OUTER JOIN (SELECT title, max(mptt_level) as max_level FROM dpaste_snippet GROUP BY title) \
+                             AS msnip ON snip.mptt_level = msnip.max_level AND snip.title = msnip.title \
+                             WHERE msnip.max_level IS NOT NULL \
+                             ORDER BY title')
     except ValueError:
         snippet_list = None
 
     template_context = {
-        'snippets_max': getattr(settings, 'MAX_SNIPPETS_PER_USER', 10),
+        'snippets_max': getattr(settings, 'MAX_SNIPPETS_PER_USER', 31),
         'snippet_list': snippet_list,
-    }
-
-    return render_to_response(
-        template_name,
-        template_context,
-        RequestContext(request)
-    )
-
-
-def userprefs(request, template_name='dpaste/userprefs.html'):
-
-    if request.method == 'POST':
-        settings_form = UserSettingsForm(
-            request.POST,
-            initial=request.session.get('userprefs', None))
-        if settings_form.is_valid():
-            request.session['userprefs'] = settings_form.cleaned_data
-            settings_saved = True
-    else:
-        settings_form = UserSettingsForm(
-            initial=request.session.get('userprefs', None))
-        settings_saved = False
-
-    template_context = {
-        'settings_form': settings_form,
-        'settings_saved': settings_saved,
     }
 
     return render_to_response(
@@ -182,9 +148,3 @@ def snippet_diff(request, template_name='dpaste/snippet_diff.html'):
         template_context,
         RequestContext(request)
     )
-
-
-def guess_lexer(request):
-    code_string = request.GET.get('codestring', False)
-    response = simplejson.dumps({'lexer': guess_code_lexer(code_string)})
-    return HttpResponse(response)

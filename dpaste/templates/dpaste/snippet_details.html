@@ -15,13 +15,10 @@
      {% endif %}
 {% endblock %}
 
-{% block title %}{% trans "Snippet" %} #{{ snippet.pk }}{% endblock %}
+{% block title %}{% trans "Snippet" %} #{{ snippet.title }}{% endblock %}
 {% block headline %}
     <h1>
-        {% trans "Snippet" %} #{{ snippet.pk }}
-        {% if snippet.parent_id %}
-            {% blocktrans with snippet.parent.get_absolute_url as parent_url and snippet.parent.id as parent_id %}(Copy of <a href="{{ parent_url }}">snippet #{{ parent_id }}</a>){% endblocktrans %}
-        {% endif %}
+        {% trans "Snippet" %} #{{ snippet.title }}
         <span class="date">{{ snippet.published|date:_("DATETIME_FORMAT") }} ({% trans "UTC" %})</span>
     </h1>
 {% endblock %}
@@ -34,10 +31,8 @@
     <div class="snippet-options">
         <abbr title="{% trans "Time to life" %}">TTL:</abbr> {{ snippet.expires|timeuntil  }}
         &mdash;
-        {% if snippet.pk|in_list:request.session.snippet_list %}
-        <a onclick="return confirm('{% trans "Really delete this snippet?" %}')" href="{% url snippet_delete snippet.secret_id %}">Delete now!</a>
+        <a onclick="return confirm('{% trans "Really publish this snippet" %}')" href="{% url snippet_merge snippet.secret_id %}">Publish and Delete</a>
         &mdash;
-        {% endif %}
         <a id="toggleWordwrap" href="#">{% trans "Wordwrap" %}</a>
     </div>
     <h2>
@@ -78,9 +73,9 @@
             <input type="radio" name="b" value="{{ tree_item.id }}" {% ifequal snippet tree_item %}checked="checked"{% endifequal %}/>
         </span>
         {% ifequal snippet tree_item %}
-            <strong>{% trans "Snippet" %} #{{ tree_item.id }}</strong>
+            <strong>{{ tree_item.published|date:_("DATETIME_FORMAT")}}</strong>
        {% else %}
-       <a href="{{ tree_item.get_absolute_url }}">{% trans "Snippet" %} #{{ tree_item.id }}</a>
+       <a href="{{ tree_item.get_absolute_url }}">{{ tree_item.published|date:_("DATETIME_FORMAT") }}</a>
         {% endifequal %}
         </div>
         {% for level in structure.closed_levels %}</li></ul>{% endfor %}
@@ -150,24 +145,6 @@ jQuery(document).ready(function(){
             $('div.snippet div.line#l'+j).toggleClass('marked');
         });
     });
-
-    {% if request.session.userprefs.display_all_lexer %}
-    /**
-    * Lexer Guessing
-    */
-    $('#guess_lexer_btn').click(function(){
-        $.getJSON('{% url snippet_guess_lexer %}',
-            {'codestring': $('#id_content').val()},
-            function(data){
-                if(data.lexer == "unknown"){
-                    $('#guess_lexer_btn').css('color', 'red');
-                }else{
-                    $('#id_lexer').val(data.lexer);
-                    $('#guess_lexer_btn').css('color', 'inherit');
-                }
-            });
-    });
-    {% endif %}
 });
 </script>
 {% endblock %}

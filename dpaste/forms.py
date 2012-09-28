@@ -9,30 +9,10 @@ import datetime
 # Snippet Form and Handling
 #==============================================================================
 
-EXPIRE_CHOICES = (
-    (3600, _(u'In one hour')),
-    (3600 * 24 * 7, _(u'In one week')),
-    (3600 * 24 * 30, _(u'In one month')),
-    (3600 * 24 * 30 * 12 * 100, _(u'Save forever')),  # 100 years
-)
-
-EXPIRE_DEFAULT = 3600 * 24 * 30
+EXPIRE_DEFAULT = 3600 * 24 * 30 * 12 * 100  # 100 years
 
 
 class SnippetForm(forms.ModelForm):
-
-    lexer = forms.ChoiceField(
-        choices=LEXER_LIST,
-        initial=LEXER_DEFAULT,
-        label=_(u'Lexer'),
-    )
-
-    expire_options = forms.ChoiceField(
-        choices=EXPIRE_CHOICES,
-        initial=EXPIRE_DEFAULT,
-        label=_(u'Expires'),
-    )
-
     if not hasattr(Snippet, 'content'):
         content = forms.CharField(
             label='Content',
@@ -52,19 +32,6 @@ class SnippetForm(forms.ModelForm):
                 content = data['content']
                 self.instance.content = data['content'].replace('\r\n', '\n')
 
-        try:
-            if self.request.session['userprefs'].get(
-                    'display_all_lexer', False):
-                self.fields['lexer'].choices = LEXER_LIST_ALL
-        except KeyError:
-            pass
-
-        try:
-            self.fields['author'].initial = \
-                self.request.session['userprefs'].get('default_name', '')
-        except KeyError:
-            pass
-
     def save(self, parent=None, *args, **kwargs):
 
         # Set parent snippet
@@ -74,7 +41,7 @@ class SnippetForm(forms.ModelForm):
         # Add expire datestamp
         self.instance.expires = datetime.datetime.now() + \
             datetime.timedelta(
-                seconds=int(self.cleaned_data['expire_options']))
+                seconds=int(EXPIRE_DEFAULT))
 
         # Save snippet in the db
         super(SnippetForm, self).save(*args, **kwargs)
@@ -95,44 +62,4 @@ class SnippetForm(forms.ModelForm):
         fields = (
             'title',
             'content',
-            'author',
-            'lexer',
         )
-
-
-#==============================================================================
-# User Settings
-#==============================================================================
-
-USERPREFS_FONT_CHOICES = [(None, _(u'Default'))] + [
-    (i, i) for i in sorted((
-        'Monaco',
-        'Bitstream Vera Sans Mono',
-        'Courier New',
-        'Consolas',
-    ))
-]
-
-USERPREFS_SIZES = [(None, _(u'Default'))] + \
-                  [(i, '%dpx' % i) for i in range(5, 25)]
-
-
-class UserSettingsForm(forms.Form):
-
-    default_name = forms.CharField(label=_(u'Default Name'), required=False)
-    display_all_lexer = forms.BooleanField(
-        label=_(u'Display all lexer'),
-        required=False,
-        widget=forms.CheckboxInput,
-        help_text=
-        _(u'This also enables the super secret \'guess lexer\' function.'),
-    )
-    font_family = forms.ChoiceField(label=_(u'Font Family'),
-                                    required=False,
-                                    choices=USERPREFS_FONT_CHOICES)
-    font_size = forms.ChoiceField(label=_(u'Font Size'),
-                                  required=False,
-                                  choices=USERPREFS_SIZES)
-    line_height = forms.ChoiceField(label=_(u'Line Height'),
-                                    required=False,
-                                    choices=USERPREFS_SIZES)
